@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽奖转盘</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto;
+        }
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid red;
+            position: relative;
+            overflow: hidden;
+            transform: rotate(0deg);
+            transition: transform 0.5s;
+        }
+        .segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            color: white;
+        }
+        .segment:nth-child(1) { background-color: #ff0000; }
+        .segment:nth-child(2) { background-color: #ffa500; }
+        .segment:nth-child(3) { background-color: #ffff00; }
+        .segment:nth-child(4) { background-color: #008000; }
+        .segment:nth-child(5) { background-color: #0000ff; }
+        .segment:nth-child(6) { background-color: #800080; }
+        
+        #pointer {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid red;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <h1>输入姓名并点击按钮抽奖</h1>
+    <input type="text" id="nameInput" placeholder="请输入姓名">
+    <button onclick="startSpin()">开始抽奖</button>
+
+    <div id="output"></div>
+    <div id="wheel-container">
+        <div id="pointer"></div>
+        <div id="wheel"></div>
+    </div>
+
+    <script>
+        // 定义奖项
+        const prizes = ["三只松鼠大礼包", "保温杯", "自行车", "蓝牙耳机", "笔记本", "再抽一次"];
+        
+        function setupWheel() {
+            const wheel = document.getElementById("wheel");
+            wheel.innerHTML = "<div id='pointer'></div>"; // 清空之前的内容并添加指针
+
+            // 创建6个分段并显示奖项名称
+            for (let i = 0; i < 6; i++) {
+                const segment = document.createElement("div");
+                segment.className = "segment";
+                segment.style.transform = `rotate(${i * 60}deg)`;
+                
+                // 奖项名称
+                const text = document.createElement("span");
+                text.innerHTML = prizes[i];
+                segment.appendChild(text);
+                wheel.appendChild(segment);
+            }
+        }
+
+        function startSpin() {
+            const name = document.getElementById("nameInput").value;
+            if (!name) {
+                document.getElementById("output").innerText = "请输入姓名！";
+                return;
+            }
+
+            document.getElementById("output").innerText = `抽奖中，${name}祝你好运！`;
+            setupWheel();
+            
+            const wheel = document.getElementById("wheel");
+            let angle = 0;
+            const totalSpins = 5 * 360; // 转5圈
+
+            // 特殊逻辑：如果名字是“高强”，让他总是抽中“三只松鼠大礼包”
+            let prizeIndex;
+            if (name === "高强") {
+                prizeIndex = 0; // 三只松鼠大礼包的位置
+            } else {
+                prizeIndex = Math.floor(Math.random() * 6); // 随机选择奖项
+            }
+            
+            const finalAngle = totalSpins + (360 - prizeIndex * 60); // 计算停止角度
+
+            const spinInterval = setInterval(() => {
+                angle += 10;
+                wheel.style.transform = `rotate(${angle}deg)`;
+                if (angle >= finalAngle) {
+                    clearInterval(spinInterval);
+                    document.getElementById("output").innerText = `恭喜${name}，你获得了${prizes[prizeIndex]}！`;
+                }
+            }, 20);
+        }
+
+        // 初始化转盘，显示奖项名称
+        setupWheel();
+    </script>
+</body>
+</html>
